@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MaxTV — Discover Movies</title>
+<style>
+  :root{
+    --bg:#0b0c10;
+    --bg-alt:#15171c;
+    --card:#1c1f26;
+    --accent:#e63946;
+    --accent2:#ffb703;
+    --text:#f1f1f1;
+    --muted:#9aa0a6;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;}
+  body{background:var(--bg);color:var(--text);}
+
+  /* NAVBAR */
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 40px;background:linear-gradient(90deg,#0b0c10,#1c1f26);
+    position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,0.5);
+  }
+  .logo{font-size:26px;font-weight:800;letter-spacing:1px;}
+  .logo span{color:var(--accent);}
+  nav ul{list-style:none;display:flex;gap:28px;}
+  nav a{color:var(--text);text-decoration:none;font-size:15px;opacity:.85;transition:.2s;}
+  nav a:hover{opacity:1;color:var(--accent2);}
+  .search-box{display:flex;align-items:center;background:var(--bg-alt);border-radius:30px;padding:6px 16px;}
+  .search-box input{background:transparent;border:none;outline:none;color:var(--text);width:200px;font-size:14px;}
+  .search-box input::placeholder{color:var(--muted);}
+
+  /* HERO */
+  .hero{
+    position:relative;height:60vh;display:flex;align-items:center;
+    background:linear-gradient(to right, rgba(11,12,16,.95), rgba(11,12,16,.4)),
+    url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=1600&auto=format&fit=crop') center/cover no-repeat;
+    padding:0 60px;
+  }
+  .hero-content{max-width:550px;}
+  .hero-content h1{font-size:48px;margin-bottom:16px;line-height:1.2;}
+  .hero-content p{color:var(--muted);margin-bottom:24px;font-size:16px;}
+  .btn{
+    display:inline-block;padding:12px 26px;border-radius:6px;text-decoration:none;
+    font-weight:600;margin-right:12px;cursor:pointer;border:none;font-size:15px;transition:.2s;
+  }
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:#c92e3a;}
+  .btn-secondary{background:rgba(255,255,255,0.1);color:#fff;}
+  .btn-secondary:hover{background:rgba(255,255,255,0.2);}
+
+  /* SECTIONS */
+  .section{padding:40px 60px;}
+  .section h2{font-size:24px;margin-bottom:20px;border-left:4px solid var(--accent);padding-left:12px;}
+
+  .grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:22px;
+  }
+  .card{
+    background:var(--card);border-radius:10px;overflow:hidden;cursor:pointer;
+    transition:transform .25s, box-shadow .25s;position:relative;
+  }
+  .card:hover{transform:translateY(-6px);box-shadow:0 10px 25px rgba(0,0,0,.5);}
+  .card img{width:100%;height:270px;object-fit:cover;display:block;}
+  .card .info{padding:10px 12px;}
+  .card .info h3{font-size:15px;margin-bottom:4px;}
+  .card .info p{font-size:12px;color:var(--muted);}
+  .rating{
+    position:absolute;top:10px;right:10px;background:rgba(0,0,0,.7);
+    color:var(--accent2);font-size:12px;font-weight:700;padding:4px 8px;border-radius:6px;
+  }
+
+  /* MODAL */
+  .modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);
+    z-index:200;align-items:center;justify-content:center;padding:20px;
+  }
+  .modal-overlay.active{display:flex;}
+  .modal{
+    background:var(--bg-alt);max-width:800px;width:100%;border-radius:14px;
+    overflow:hidden;max-height:90vh;overflow-y:auto;
+  }
+  .modal-header{position:relative;}
+  .modal-header img{width:100%;height:320px;object-fit:cover;}
+  .modal-close{
+    position:absolute;top:14px;right:14px;background:rgba(0,0,0,.6);
+    color:#fff;border:none;width:34px;height:34px;border-radius:50%;
+    font-size:18px;cursor:pointer;
+  }
+  .modal-body{padding:24px;}
+  .modal-body h2{font-size:26px;margin-bottom:8px;}
+  .modal-meta{display:flex;gap:14px;color:var(--muted);font-size:13px;margin-bottom:16px;flex-wrap:wrap;}
+  .modal-body p.desc{color:#d3d3d3;line-height:1.6;margin-bottom:20px;font-size:14px;}
+  .trailer-wrap{position:relative;padding-bottom:56.25%;height:0;border-radius:8px;overflow:hidden;margin-bottom:10px;}
+  .trailer-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;}
+
+  footer{
+    text-align:center;padding:30px;color:var(--muted);font-size:13px;
+    border-top:1px solid #222;margin-top:40px;
+  }
+
+  @media(max-width:700px){
+    header{padding:14px 18px;}
+    nav{display:none;}
+    .hero{padding:0 24px;}
+    .hero-content h1{font-size:32px;}
+    .section{padding:30px 20px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Max<span>TV</span></div>
+  <nav>
+    <ul>
+      <li><a href="#trending">Trending</a></li>
+      <li><a href="#hindi">Hindi Movies</a></li>
+      <li><a href="#popular">Popular</a></li>
+      <li><a href="#top">Top Rated</a></li>
+    </ul>
+  </nav>
+  <div class="search-box">
+    🔍 <input type="text" id="searchInput" placeholder="Search movies...">
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-content">
+    <h1>Discover Your Next Favorite Movie</h1>
+    <p>Browse trending titles, watch trailers, read details, and build your watchlist — all in one place.</p>
+    <a href="#trending" class="btn btn-primary">Start Exploring</a>
+    <a href="#popular" class="btn btn-secondary">Popular Picks</a>
+  </div>
+</section>
+
+<section class="section" id="trending">
+  <h2>Trending Now</h2>
+  <div class="grid" id="trendingGrid"></div>
+</section>
+
+<section class="section" id="hindi">
+  <h2>Hindi Movies — Trending</h2>
+  <div class="grid" id="hindiGrid"></div>
+</section>
+
+<section class="section" id="popular">
+  <h2>Popular</h2>
+  <div class="grid" id="popularGrid"></div>
+</section>
+
+<section class="section" id="top">
+  <h2>Top Rated</h2>
+  <div class="grid" id="topGrid"></div>
+</section>
+
+<footer>
+  © 2026 MaxTV — Movie discovery demo. Trailers via YouTube. Posters via public placeholder sources.
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <img id="modalImg" src="" alt="">
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <h2 id="modalTitle"></h2>
+      <div class="modal-meta">
+        <span id="modalYear"></span>
+        <span id="modalGenre"></span>
+        <span id="modalRating"></span>
+      </div>
+      <p class="desc" id="modalDesc"></p>
+      <div class="trailer-wrap" id="trailerWrap"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- MOVIE DATA ----------
+// poster images: placeholder via picsum (random) - replace with real posters/links as you like
+// trailer youtubeId: replace with actual official trailer video IDs you have rights to embed
+const movies = [
+  {title:"Galaxy Drift", year:2025, genre:"Sci-Fi", rating:8.4,
+   poster:"https://picsum.photos/seed/galaxy/400/600",
+   desc:"A stranded crew must navigate a collapsing wormhole to find their way home before time runs out.",
+   trailer:"dQw4w9WgXcQ", category:"trending"},
+  {title:"Crimson Hour", year:2024, genre:"Thriller", rating:7.9,
+   poster:"https://picsum.photos/seed/crimson/400/600",
+   desc:"A detective races against the clock to stop a heist that threatens an entire city.",
+   trailer:"dQw4w9WgXcQ", category:"trending"},
+  {title:"Wild Horizon", year:2023, genre:"Adventure", rating:8.1,
+   poster:"https://picsum.photos/seed/wild/400/600",
+   desc:"Two estranged siblings trek across untamed wilderness to fulfill their father's last wish.",
+   trailer:"dQw4w9WgXcQ", category:"trending"},
+  {title:"Neon Pulse", year:2025, genre:"Action", rating:7.6,
+   poster:"https://picsum.photos/seed/neon/400/600",
+   desc:"In a city run by corporations, a rogue courier uncovers a conspiracy that could topple them all.",
+   trailer:"dQw4w9WgXcQ", category:"popular"},
+  {title:"The Quiet Orchard", year:2022, genre:"Drama", rating:8.7,
+   poster:"https://picsum.photos/seed/orchard/400/600",
+   desc:"A family reunites at their childhood farm, confronting old wounds over one long summer.",
+   trailer:"dQw4w9WgXcQ", category:"popular"},
+  {title:"Iron Tide", year:2024, genre:"War", rating:8.0,
+   poster:"https://picsum.photos/seed/iron/400/600",
+   desc:"A naval crew fights to survive an impossible siege during the final days of a forgotten war.",
+   trailer:"dQw4w9WgXcQ", category:"popular"},
+  {title:"Velvet Mirage", year:2021, genre:"Mystery", rating:8.9,
+   poster:"https://picsum.photos/seed/velvet/400/600",
+   desc:"A magician's disappearance unravels a decades-old secret hidden beneath a grand old theatre.",
+   trailer:"dQw4w9WgXcQ", category:"top"},
+  {title:"Echoes of Dawn", year:2020, genre:"Fantasy", rating:9.1,
+   poster:"https://picsum.photos/seed/echoes/400/600",
+   desc:"A young mapmaker discovers a hidden realm that only appears at sunrise.",
+   trailer:"dQw4w9WgXcQ", category:"top"},
+  {title:"Granite Sky", year:2023, genre:"Drama", rating:8.6,
+   poster:"https://picsum.photos/seed/granite/400/600",
+   desc:"An aging mountaineer attempts one final climb to reconcile with his estranged daughter.",
+   trailer:"dQw4w9WgXcQ", category:"top"},
+
+  // ---- Hindi / Bollywood trending ----
+  {title:"Jawan", year:2023, genre:"Action", rating:7.8,
+   poster:"https://picsum.photos/seed/jawan/400/600",
+   desc:"A man uses a gang of women to right the wrongs done to common people, while hiding a deeper personal mission.",
+   trailer:"COv52Qyctws", category:"hindi"},
+  {title:"Animal", year:2023, genre:"Crime Drama", rating:6.8,
+   poster:"https://picsum.photos/seed/animal/400/600",
+   desc:"A son's intense devotion to his father spirals into a violent battle against his enemies.",
+   trailer:"8FkLRUJj-o0", category:"hindi"},
+  {title:"12th Fail", year:2023, genre:"Biography", rating:9.1,
+   poster:"https://picsum.photos/seed/12thfail/400/600",
+   desc:"The inspiring true story of an IPS officer who overcame poverty and repeated failure to achieve his dream.",
+   trailer:"WeMJo701mvQ", category:"hindi"},
+  {title:"Gadar 2", year:2023, genre:"Action Drama", rating:7.2,
+   poster:"https://picsum.photos/seed/gadar2/400/600",
+   desc:"Tara Singh crosses the border once again to rescue his son from the clutches of the Pakistani army.",
+   trailer:"mljj92tRwlk", category:"hindi"},
+  {title:"Pathaan", year:2023, genre:"Action Thriller", rating:7.0,
+   poster:"https://picsum.photos/seed/pathaan/400/600",
+   desc:"An exiled RAW agent teams up with old allies to take down a rogue agent threatening India.",
+   trailer:"vqu4z34wENw", category:"hindi"},
+  {title:"Stree 2", year:2024, genre:"Horror Comedy", rating:7.6,
+   poster:"https://picsum.photos/seed/stree2/400/600",
+   desc:"The town of Chanderi faces a new supernatural threat even more dangerous than Stree.",
+   trailer:"KVnheXywIbY", category:"hindi"},
+];
+
+// ---------- RENDER ----------
+function renderGrid(containerId, category){
+  const container = document.getElementById(containerId);
+  const list = movies.filter(m => m.category === category);
+  container.innerHTML = list.map((m, idx) => `
+    <div class="card" onclick="openModal('${m.category}', ${movies.indexOf(m)})">
+      <span class="rating">★ ${m.rating}</span>
+      <img src="${m.poster}" alt="${m.title}">
+      <div class="info">
+        <h3>${m.title}</h3>
+        <p>${m.year} • ${m.genre}</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+renderGrid('trendingGrid','trending');
+renderGrid('hindiGrid','hindi');
+renderGrid('popularGrid','popular');
+renderGrid('topGrid','top');
+
+// ---------- MODAL ----------
+const overlay = document.getElementById('modalOverlay');
+function openModal(category, index){
+  const m = movies[index];
+  document.getElementById('modalImg').src = m.poster;
+  document.getElementById('modalTitle').innerText = m.title;
+  document.getElementById('modalYear').innerText = m.year;
+  document.getElementById('modalGenre').innerText = m.genre;
+  document.getElementById('modalRating').innerText = "★ " + m.rating;
+  document.getElementById('modalDesc').innerText = m.desc;
+  document.getElementById('trailerWrap').innerHTML =
+    `<iframe src="https://www.youtube.com/embed/${m.trailer}" allowfullscreen></iframe>`;
+  overlay.classList.add('active');
+}
+document.getElementById('modalClose').onclick = closeModal;
+overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); });
+function closeModal(){
+  overlay.classList.remove('active');
+  document.getElementById('trailerWrap').innerHTML = '';
+}
+
+// ---------- SEARCH ----------
+document.getElementById('searchInput').addEventListener('input', function(e){
+  const q = e.target.value.toLowerCase();
+  document.querySelectorAll('.card').forEach(card => {
+    const title = card.querySelector('h3').innerText.toLowerCase();
+    card.style.display = title.includes(q) ? 'block' : 'none';
+  });
+});
+</script>
+
+</body>
+</html>
